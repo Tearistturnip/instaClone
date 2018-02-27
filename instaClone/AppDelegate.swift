@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Parse
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,8 +17,62 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        Parse.initialize(
+            with: ParseClientConfiguration(block: { (configuration: ParseMutableClientConfiguration) -> Void in
+                configuration.applicationId = "instaClone"
+                configuration.clientKey = "afkfalkjafklafjklfakajlf"  // set to nil assuming you have not set clientKey
+ 
+                configuration.server = "https://serene-hamlet-34307.herokuapp.com/parse"
+                
+            })
+        )
+        NotificationCenter.default.addObserver(forName: Notification.Name("didLogout"), object: nil, queue: OperationQueue.main) { (Notification) in
+            print("Logout notification received")
+            // TODO: Logout the User
+            // TODO: Load and show the login view controller
+            self.logOut()
+            
+        }
+        
+        
+        if PFUser.current() != nil {
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            // view controller currently being set in Storyboard as default will be overridden
+            
+            
+          /*
+            self.window?.rootViewController = storyboard.instantiateViewController(withIdentifier:
+                "homeScreen")
+ */
+            
+            self.window?.rootViewController = storyboard.instantiateViewController(withIdentifier:
+                "navigationController")
+            
+          
+        }
+ 
         return true
     }
+    
+    
+    func logOut() {
+        // Logout the current user
+        PFUser.logOutInBackground(block: { (error) in
+            if let error = error {
+                print(error.localizedDescription)
+            } else {
+                print("Successful loggout")
+                // Load and show the login view controller
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                let loginViewController = storyboard.instantiateViewController(withIdentifier: "startingScreen")
+                self.window?.rootViewController = loginViewController
+            }
+        })
+    }
+    
+    
+    
+    
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
